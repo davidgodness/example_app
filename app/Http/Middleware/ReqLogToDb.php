@@ -27,8 +27,10 @@ class ReqLogToDb
 	            `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	            `method` VARCHAR(8) NOT NULL,
                 `path` VARCHAR(256) NOT NULL,
+                `req_headers` LONGTEXT NOT NULL,
                 `req_data` LONGTEXT NOT NULL,
-                `response_content` LONGTEXT NOT NULL,
+                `response_content` LONGTEXT,
+                `response_time` TIMESTAMP NOT NULL,
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )");
@@ -37,10 +39,10 @@ class ReqLogToDb
         DB::table($tableName)->insert([
             'method' => $request->method(),
             'path' => $request->path(),
+            'req_headers' => json_encode($request->headers->all()),
             'req_data' => $request->getContent(),
             'response_content' => $response->getContent(),
-            'created_at' => now(),
-            'updated_at' => now()
+            'response_time' => $response->getDate()->format('Y-m-d H:i:s'),
         ]);
 
         return $response;
