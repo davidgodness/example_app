@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Http\ApiResponse;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -31,8 +32,20 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $e) {
+            if (config('app.debug')) {
+
+                $data = ApiResponse::error($e->getCode(), $e->getMessage(), [], [
+                    'exception' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => collect($e->getTrace())->map(fn($trace) => Arr::except($trace, ['args']))->all(),
+                ]);
+            } else {
+                $data = ApiResponse::error($e->getCode(), $e->getMessage());
+            }
+
             return new JsonResponse(
-                ApiResponse::error($e),
+                $data,
                 $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500,
                 $e instanceof HttpExceptionInterface ? $e->getHeaders() : [],
                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES

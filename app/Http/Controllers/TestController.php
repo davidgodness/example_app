@@ -16,7 +16,7 @@ class TestController extends Controller
 
     public function expectedError()
     {
-        throw new BadRequestHttpException('invalid params');
+        throw new BadRequestHttpException('invalid params', null, 1);
     }
 
     /**
@@ -31,16 +31,21 @@ class TestController extends Controller
     {
         $s = $request->query('s');
 
+        if (is_null($s)) {
+            return ApiResponse::error(1, "no query string 's'");
+        }
+
         if (strlen($s) == 0) {
-            return ApiResponse::success(false);
+            throw new BadRequestHttpException("'s' has no value", null, 2);
         }
 
         if (strlen($s) < 1 || strlen($s) > 10000) {
-            throw new BadRequestHttpException('1 <= s.length <= 10000');
+            throw new BadRequestHttpException('1 <= s.length <= 10000', null, 3);
         }
 
         if (preg_match('/[^(){}\[\]]/', $s)) {
-            throw new BadRequestHttpException("'s' consists of parentheses only '()[]{}'");
+            throw new BadRequestHttpException("'s' consists of parentheses only '()[]{}'",
+                null, 4);
         }
 
         $stack = [];
@@ -55,7 +60,7 @@ class TestController extends Controller
                 $pair = array_pop($stack);
 
                 if (is_null($pair) || $pair !== $map[$s[$i]]) {
-                    return ApiResponse::success(false);
+                    return ApiResponse::error(5, 'not valid', false);
                 }
             }
 
@@ -67,7 +72,7 @@ class TestController extends Controller
         if (empty($stack)) {
             return ApiResponse::success(true);
         } else {
-            return ApiResponse::success(false);
+            return ApiResponse::error(5, 'not valid', false);
         }
     }
 }
