@@ -10,7 +10,7 @@ class TestController extends Controller
 {
     public function printRequest(Request $request): array
     {
-        return $this->success(['headers' => $request->headers->all(), 'body' => $request->getContent()]);
+        return ['headers' => $request->headers->all(), 'body' => $request->getContent()];
     }
 
     public function expectedError()
@@ -26,12 +26,12 @@ class TestController extends Controller
         throw new Exception();
     }
 
-    public function checkStr(Request $request): array
+    public function checkStr(Request $request): bool
     {
         $s = $request->query('s');
 
         if (strlen($s) == 0) {
-            return $this->success();
+            return false;
         }
 
         if (strlen($s) < 1 || strlen($s) > 10000) {
@@ -54,7 +54,7 @@ class TestController extends Controller
                 $pair = array_pop($stack);
 
                 if (is_null($pair) || $pair !== $map[$s[$i]]) {
-                    return $this->failure(0, 'error', false);
+                    return false;
                 }
             }
 
@@ -64,9 +64,9 @@ class TestController extends Controller
         }
 
         if (empty($stack)) {
-            return $this->success(true);
+            return true;
         } else {
-            return $this->failure(0, 'error', false);
+            return false;
         }
     }
 }
