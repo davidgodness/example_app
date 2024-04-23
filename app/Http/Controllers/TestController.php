@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\ApiResponse;
 use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -10,12 +11,12 @@ class TestController extends Controller
 {
     public function printRequest(Request $request): array
     {
-        return ['headers' => $request->headers->all(), 'body' => $request->getContent()];
+        return ApiResponse::success(['headers' => $request->headers->all(), 'body' => $request->getContent()]);
     }
 
     public function expectedError()
     {
-        throw new BadRequestHttpException();
+        throw new BadRequestHttpException('invalid params');
     }
 
     /**
@@ -26,12 +27,12 @@ class TestController extends Controller
         throw new Exception();
     }
 
-    public function checkStr(Request $request): bool
+    public function checkStr(Request $request): array
     {
         $s = $request->query('s');
 
         if (strlen($s) == 0) {
-            return false;
+            return ApiResponse::success(false);
         }
 
         if (strlen($s) < 1 || strlen($s) > 10000) {
@@ -54,7 +55,7 @@ class TestController extends Controller
                 $pair = array_pop($stack);
 
                 if (is_null($pair) || $pair !== $map[$s[$i]]) {
-                    return false;
+                    return ApiResponse::success(false);
                 }
             }
 
@@ -64,9 +65,9 @@ class TestController extends Controller
         }
 
         if (empty($stack)) {
-            return true;
+            return ApiResponse::success(true);
         } else {
-            return false;
+            return ApiResponse::success(false);
         }
     }
 }
