@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [TestController::class, 'printRequest']);
+Route::get('/expected_error', [TestController::class, 'expectedError']);
+Route::get('/unexpected_error', [TestController::class, 'unexpectedError']);
+Route::get('/check_str', [TestController::class, 'checkStr']);
